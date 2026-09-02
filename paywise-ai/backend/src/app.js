@@ -11,7 +11,6 @@ app.use('/api', paymentRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
-  });
+});
 
-  export default app;
-  
+export default app;
