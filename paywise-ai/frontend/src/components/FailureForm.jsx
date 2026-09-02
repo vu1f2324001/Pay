@@ -2,98 +2,145 @@ import { useState } from 'react';
 
 export default function FailureForm({ onAnalyze, loading }) {
   const [formData, setFormData] = useState({
-      transactionId: '',
-          amount: '',
-              paymentMethod: 'UPI',
-                  errorCode: '',
-                      errorMessage: '',
-                        });
+    transactionId: '',
+    amount: '',
+    paymentMethod: 'UPI',
+    errorCode: '',
+    errorMessage: '',
+  });
 
-                          const sampleScenarios = [
-                              {
-                                    transactionId: `txn_${Math.floor(100000 + Math.random() * 900000)}`,
-                                          amount: '1299',
-                                                paymentMethod: 'UPI',
-                                                      errorCode: 'BAD_REQUEST_ERROR',
-                                                            errorMessage: 'VPA not found / Incorrect UPI handle registered.',
-                                                                },
-                                                                    {
-                                                                          transactionId: `txn_${Math.floor(100000 + Math.random() * 900000)}`,
-                                                                                amount: '4500',
-                                                                                      paymentMethod: 'Card',
-                                                                                            errorCode: 'INSUFFICIENT_FUNDS',
-                                                                                                  errorMessage: 'Declined: account has insufficient credit limit.',
-                                                                                                      },
-                                                                                                          {
-                                                                                                                transactionId: `txn_${Math.floor(100000 + Math.random() * 900000)}`,
-                                                                                                                      amount: '8999',
-                                                                                                                            paymentMethod: 'NetBanking',
-                                                                                                                                  errorCode: 'GATEWAY_TIMEOUT',
-                                                                                                                                        errorMessage: 'Timed out waiting for response from issuer netbanking portal.',
-                                                                                                                                            },
-                                                                                                                                              ];
+  const sampleScenarios = [
+    {
+      transactionId: `txn_${Math.floor(100000 + Math.random() * 900000)}`,
+      amount: '1299',
+      paymentMethod: 'UPI',
+      errorCode: 'BAD_REQUEST_ERROR',
+      errorMessage: 'VPA not found / Incorrect UPI handle registered.',
+    },
+    {
+      transactionId: `txn_${Math.floor(100000 + Math.random() * 900000)}`,
+      amount: '4500',
+      paymentMethod: 'Card',
+      errorCode: 'INSUFFICIENT_FUNDS',
+      errorMessage: 'Declined: account has insufficient credit limit.',
+    },
+    {
+      transactionId: `txn_${Math.floor(100000 + Math.random() * 900000)}`,
+      amount: '8999',
+      paymentMethod: 'NetBanking',
+      errorCode: 'GATEWAY_TIMEOUT',
+      errorMessage: 'Timed out waiting for response from issuer netbanking portal.',
+    },
+  ];
 
-                                                                                                                                                const handleFillSample = (sample) => {
-                                                                                                                                                    setFormData(sample);
-                                                                                                                                                      };
+  const handleFillSample = (sample) => {
+    setFormData(sample);
+  };
 
-                                                                                                                                                        const handleChange = (e) => {
-                                                                                                                                                            setFormData({ ...formData, [e.target.name]: e.target.value });
-                                                                                                                                                              };
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-                                                                                                                                                                const handleSubmit = (e) => {
-                                                                                                                                                                    e.preventDefault();
-                                                                                                                                                                        onAnalyze(formData);
-                                                                                                                                                                          };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onAnalyze(formData);
+  };
 
-                                                                                                                                                                            return (
-                                                                                                                                                                                <div className="card shadow-sm border-0 p-4 mb-4">
-                                                                                                                                                                                      <div className="d-flex justify-content-between align-items-center mb-3">
-                                                                                                                                                                                              <h5 className="mb-0 fw-bold">Analyze Payment Failure</h5>
-                                                                                                                                                                                                      <div className="btn-group btn-group-sm">
-                                                                                                                                                                                                                <button
-                                                                                                                                                                                                                            type="button"
-                                                                                                                                                                                                                                        className="btn btn-outline-secondary dropdown-toggle"
-                                                                                                                                                                                                                                                    data-bs-toggle="dropdown"
-                                                                                                                                                                                                                                                                onClick={() => handleFillSample(sampleScenarios[Math.floor(Math.random() * sampleScenarios.length)])}
-                                                                                                                                                                                                                                                                          >
-                                                                                                                                                                                                                                                                                      Auto-fill Sample Issue
-                                                                                                                                                                                                                                                                                                </button>
-                                                                                                                                                                                                                                                                                                        </div>
-                                                                                                                                                                                                                                                                                                              </div>
+  return (
+    <div className="card shadow-sm border-0 p-4 mb-4">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="mb-0 fw-bold">Analyze Payment Failure</h5>
+        <div className="btn-group btn-group-sm">
+          <button
+            type="button"
+            className="btn btn-outline-secondary dropdown-toggle"
+            data-bs-toggle="dropdown"
+            onClick={() => handleFillSample(sampleScenarios[Math.floor(Math.random() * sampleScenarios.length)])}
+          >
+            Auto-fill Sample Issue
+          </button>
+        </div>
+      </div>
 
-                                                                                                                                                                                                                                                                                                                    <form onSubmit={handleSubmit}>
-                                                                                                                                                                                                                                                                                                                            <div className="row g-3">
-                                                                                                                                                                                                                                                                                                                                      <div className="col-md-6">
-                                                                                                                                                                                                                                                                                                                                                  <label className="form-label small fw-semibold">Transaction ID</label>
-                                                                                                                                                                                                                                                                                                                                                              <input
-                                                                                                                                                                                                                                                                                                                                                                            type="text"
-                                                                                                                                                                                                                                                                                                                                                                                          name="transactionId"
-                                                                                                                                                                                                                                                                                                                                                                                                        value={formData.transactionId}
-                                                                                                                                                                                                                                                                                                                                                                                                                      onChange={handleChange}
-                                                                                                                                                                                                                                                                                                                                                                                                                                    className="form-control"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                  placeholder="e.g. txn_983712"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                required
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                            />
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="row g-3">
+          <div className="col-md-6">
+            <label className="form-label small fw-semibold">Transaction ID</label>
+            <input
+              type="text"
+              name="transactionId"
+              value={formData.transactionId}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="e.g. txn_983712"
+              required
+            />
+          </div>
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <div className="col-md-3">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            <label className="form-label small fw-semibold">Amount (₹)</label>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <input
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      type="number"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    name="amount"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  value={formData.amount}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                onChange={handleChange}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              className="form-control"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            placeholder="1200"
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          required
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      />
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                </div>
+          <div className="col-md-3">
+            <label className="form-label small fw-semibold">Amount (₹)</label>
+            <input
+              type="number"
+              name="amount"
+              value={formData.amount}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="1200"
+              required
+            />
+          </div>
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          <div className="col-md-3">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      <label className="form-label small fw-semibold">Method</label>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  <select
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                name="paymentMethod"
+          <div className="col-md-3">
+            <label className="form-label small fw-semibold">Method</label>
+            <select
+              name="paymentMethod"
+              value={formData.paymentMethod}
+              onChange={handleChange}
+              className="form-select"
+            >
+              <option value="UPI">UPI</option>
+              <option value="Card">Card</option>
+              <option value="NetBanking">NetBanking</option>
+              <option value="Wallet">Wallet</option>
+            </select>
+          </div>
+
+          <div className="col-md-4">
+            <label className="form-label small fw-semibold">Error Code</label>
+            <input
+              type="text"
+              name="errorCode"
+              value={formData.errorCode}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="e.g. PAYMENT_FAILED_AUTH"
+              required
+            />
+          </div>
+
+          <div className="col-md-8">
+            <label className="form-label small fw-semibold">Error Message</label>
+            <input
+              type="text"
+              name="errorMessage"
+              value={formData.errorMessage}
+              onChange={handleChange}
+              className="form-control"
+              placeholder="e.g. User canceled OTP authentication on second factor page"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="mt-4 text-end">
+          <button type="submit" className="btn btn-primary px-4 fw-semibold" disabled={loading}>
+            {loading ? 'Analyzing with Gemini...' : 'Analyze with PayWise AI'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               value={formData.paymentMethod}
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             onChange={handleChange}
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           className="form-select"
