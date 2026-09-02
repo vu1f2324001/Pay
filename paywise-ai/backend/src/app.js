@@ -1,11 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import paymentRoutes from './routes/paymentRoutes.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -18,7 +14,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-const frontendDistPath = path.resolve(__dirname, '../../../frontend/dist');
+// Render root directory paywise-ai pasun frontend/dist cha exact path
+const frontendDistPath = path.resolve(process.cwd(), 'frontend/dist');
 app.use(express.static(frontendDistPath));
 
 app.get('*', (req, res) => {
