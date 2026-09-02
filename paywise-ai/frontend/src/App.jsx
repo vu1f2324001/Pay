@@ -5,20 +5,51 @@ export default function App() {
   const [formData, setFormData] = useState({
     transactionId: 'txn_test_101',
     amount: '1499',
-    paymentMethod: 'UPI',
+    method: 'UPI',
     errorCode: 'U30',
     errorMessage: 'Transaction timed out at beneficiary bank'
   });
   const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleMockAnalyze = () => {
-    setResult({
-      reason: 'Beneficiary Bank Latency',
-      explanation: 'The customer account had funds debited or locked, but receiving bank took too long.',
-      recommendedAction: 'Wait 15 mins for auto-reversal or retry via Card.',
-      retry: false,
-      riskLevel: 'Low'
-    });
+  const handleAnalyze = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/analyze-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          transactionId: formData.transactionId,
+          amount: Number(formData.amount),
+          method: formData.method,
+          errorMessage: formData.errorMessage
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || 'Failed to analyze payment failure');
+      }
+
+      // Backend returns either data.analysis or directly the result object
+      const analysisData = data.analysis || data;
+      setResult({
+        reason: analysisData.reason,
+        explanation: analysisData.explanation,
+        recommendedAction: analysisData.recommendedAction,
+        retry: Boolean(analysisData.retry),
+        riskLevel: analysisData.riskLevel || 'Low'
+      });
+    } catch (err) {
+      setError(err.message || 'Something went wrong while connecting to Gemini AI');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,16 +84,21 @@ export default function App() {
                 </div>
                 <div className="col-6">
                   <label className="form-label small fw-semibold">Method</label>
-                  <input className="form-control" value={formData.paymentMethod} readOnly />
+                  <input className="form-control" value={formData.method} readOnly />
                 </div>
               </div>
               <div className="mb-2">
                 <label className="form-label small fw-semibold">Error Message</label>
                 <input className="form-control" value={formData.errorMessage} readOnly />
               </div>
-              <button className="btn btn-primary mt-3 w-100 fw-semibold" onClick={handleMockAnalyze}>
-                Run AI Diagnosis
+              <button 
+                className="btn btn-primary mt-3 w-100 fw-semibold" 
+                onClick={handleAnalyze}
+                disabled={loading}
+              >
+                {loading ? 'Analyzing with Gemini AI...' : 'Run AI Diagnosis'}
               </button>
+              {error && <div className="alert alert-danger mt-3 py-2 small">{error}</div>}
             </div>
           </div>
 
@@ -70,16 +106,20 @@ export default function App() {
             {result ? (
               <div className="card border-0 shadow-sm border-top border-danger border-4 p-4">
                 <h5 className="text-danger fw-bold">❌ {result.reason}</h5>
-                <span className="badge bg-success w-25 mb-3">Risk: {result.riskLevel}</span>
+                <span className={`badge ${result.riskLevel === 'High' ? 'bg-danger' : result.riskLevel === 'Medium' ? 'bg-warning text-dark' : 'bg-success'} w-25 mb-3`}>
+                  Risk: {result.riskLevel}
+                </span>
                 <p className="text-secondary small mb-2">{result.explanation}</p>
                 <div className="alert alert-light border small mb-2">
                   <strong>Recommended Action:</strong> {result.recommendedAction}
                 </div>
-                <span className="badge bg-danger-subtle text-danger border border-danger">Retry: No</span>
+                <span className={`badge ${result.retry ? 'bg-success-subtle text-success border border-success' : 'bg-danger-subtle text-danger border border-danger'}`}>
+                  Retry: {result.retry ? 'Yes' : 'No'}
+                </span>
               </div>
             ) : (
-              <div className="card border-0 shadow-sm p-4 text-center text-muted h-75 d-flex justify-content-center">
-                Click "Run AI Diagnosis" to analyze failure reasons.
+              <div className="card border-0 shadow-sm p-4 text-center text-muted h-75 d-flex justify-content-center align-items-center">
+                {loading ? 'Consulting Gemini AI diagnostics...' : 'Click "Run AI Diagnosis" to analyze failure reasons.'}
               </div>
             )}
           </div>
