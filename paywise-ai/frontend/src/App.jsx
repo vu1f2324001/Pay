@@ -5,7 +5,7 @@ export default function App() {
   const [formData, setFormData] = useState({
     transactionId: 'txn_test_101',
     amount: '1499',
-    method: 'UPI',
+    paymentMethod: 'UPI',
     errorCode: 'U30',
     errorMessage: 'Transaction timed out at beneficiary bank'
   });
@@ -25,7 +25,8 @@ export default function App() {
         body: JSON.stringify({
           transactionId: formData.transactionId,
           amount: Number(formData.amount),
-          method: formData.method,
+          paymentMethod: formData.paymentMethod,
+          errorCode: formData.errorCode,
           errorMessage: formData.errorMessage
         })
       });
@@ -36,7 +37,6 @@ export default function App() {
         throw new Error(data.message || data.error || 'Failed to analyze payment failure');
       }
 
-      // Backend returns either data.analysis or directly the result object
       const analysisData = data.analysis || data;
       setResult({
         reason: analysisData.reason,
@@ -84,7 +84,7 @@ export default function App() {
                 </div>
                 <div className="col-6">
                   <label className="form-label small fw-semibold">Method</label>
-                  <input className="form-control" value={formData.method} readOnly />
+                  <input className="form-control" value={formData.paymentMethod} readOnly />
                 </div>
               </div>
               <div className="mb-2">
