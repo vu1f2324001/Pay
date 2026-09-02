@@ -1,110 +1,89 @@
-import { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
-import MetricsDashboard from './components/MetricsDashboard';
-import FailureForm from './components/FailureForm';
-import AnalysisResultCard from './components/AnalysisResultCard';
-import TransactionTable from './components/TransactionTable';
+import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
 export default function App() {
-  const [stats, setStats] = useState({
-    totalTransactions: 0,
-    successfulPayments: 0,
-    failedPayments: 0,
-    successRate: 0,
+  const [formData, setFormData] = useState({
+    transactionId: 'txn_test_101',
+    amount: '1499',
+    paymentMethod: 'UPI',
+    errorCode: 'U30',
+    errorMessage: 'Transaction timed out at beneficiary bank'
   });
-  const [transactions, setTransactions] = useState([]);
-  const [currentAnalysis, setCurrentAnalysis] = useState(null);
-  const [analyzedTxId, setAnalyzedTxId] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [errorBanner, setErrorBanner] = useState('');
+  const [result, setResult] = useState(null);
 
-  const loadData = async () => {
-    try {
-      const [statsRes, txRes] = await Promise.all([
-        fetch(`${API_BASE}/stats`),
-        fetch(`${API_BASE}/transactions`),
-      ]);
-
-      const statsData = await statsRes.json();
-      const txData = await txRes.json();
-
-      if (statsData.success) setStats(statsData.stats);
-      if (txData.success) setTransactions(txData.data);
-    } catch (err) {
-      console.error('Failed to load initial data:', err);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const handleAnalyze = async (formData) => {
-    setLoading(true);
-    setErrorBanner('');
-    try {
-      const res = await fetch(`${API_BASE}/analyze-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      const json = await res.json();
-      if (!json.success) {
-        throw new Error(json.message || 'Analysis failed');
-      }
-
-      setCurrentAnalysis(json.analysis);
-      setAnalyzedTxId(formData.transactionId);
-      await loadData();
-    } catch (err) {
-      setErrorBanner(err.message);
-    } finally {
-      setLoading(false);
-    }
+  const handleMockAnalyze = () => {
+    setResult({
+      reason: 'Beneficiary Bank Latency',
+      explanation: 'The customer account had funds debited or locked, but receiving bank took too long.',
+      recommendedAction: 'Wait 15 mins for auto-reversal or retry via Card.',
+      retry: false,
+      riskLevel: 'Low'
+    });
   };
 
   return (
     <div className="bg-light min-vh-100 pb-5">
-      <Navbar />
-      <div className="container">
-        {errorBanner && (
-          <div className="alert alert-danger alert-dismissible fade show" role="alert">
-            {errorBanner}
-            <button
-              type="button"
-              className="btn-close"
-              onClick={() => setErrorBanner('')}
-            ></button>
-          </div>
-        )}
+      <nav className="navbar navbar-dark bg-dark px-4 mb-4">
+        <span className="navbar-brand fw-bold text-primary">
+          PayWise <span className="text-white">AI</span>
+        </span>
+        <span className="badge bg-secondary">Internship Demo</span>
+      </nav>
 
-        <MetricsDashboard stats={stats} />
+      <div className="container">
+        <div className="row g-3 mb-4">
+          <div className="col-3"><div className="card p-3 shadow-sm border-0 border-start border-primary border-4"><small className="text-muted">Total</small><h4>12</h4></div></div>
+          <div className="col-3"><div className="card p-3 shadow-sm border-0 border-start border-success border-4"><small className="text-muted">Success</small><h4 className="text-success">9</h4></div></div>
+          <div className="col-3"><div className="card p-3 shadow-sm border-0 border-start border-danger border-4"><small className="text-muted">Failed</small><h4 className="text-danger">3</h4></div></div>
+          <div className="col-3"><div className="card p-3 shadow-sm border-0 border-start border-warning border-4"><small className="text-muted">Success Rate</small><h4>75%</h4></div></div>
+        </div>
 
         <div className="row">
-          <div className="col-lg-7">
-            <FailureForm onAnalyze={handleAnalyze} loading={loading} />
+          <div className="col-md-7">
+            <div className="card border-0 shadow-sm p-4 mb-4">
+              <h5 className="fw-bold mb-3">Analyze Payment Failure</h5>
+              <div className="mb-2">
+                <label className="form-label small fw-semibold">Transaction ID</label>
+                <input className="form-control" value={formData.transactionId} readOnly />
+              </div>
+              <div className="row mb-2">
+                <div className="col-6">
+                  <label className="form-label small fw-semibold">Amount</label>
+                  <input className="form-control" value={`₹${formData.amount}`} readOnly />
+                </div>
+                <div className="col-6">
+                  <label className="form-label small fw-semibold">Method</label>
+                  <input className="form-control" value={formData.paymentMethod} readOnly />
+                </div>
+              </div>
+              <div className="mb-2">
+                <label className="form-label small fw-semibold">Error Message</label>
+                <input className="form-control" value={formData.errorMessage} readOnly />
+              </div>
+              <button className="btn btn-primary mt-3 w-100 fw-semibold" onClick={handleMockAnalyze}>
+                Run AI Diagnosis
+              </button>
+            </div>
           </div>
-          <div className="col-lg-5">
-            {currentAnalysis ? (
-              <AnalysisResultCard
-                analysis={currentAnalysis}
-                transactionId={analyzedTxId}
-              />
+
+          <div className="col-md-5">
+            {result ? (
+              <div className="card border-0 shadow-sm border-top border-danger border-4 p-4">
+                <h5 className="text-danger fw-bold">❌ {result.reason}</h5>
+                <span className="badge bg-success w-25 mb-3">Risk: {result.riskLevel}</span>
+                <p className="text-secondary small mb-2">{result.explanation}</p>
+                <div className="alert alert-light border small mb-2">
+                  <strong>Recommended Action:</strong> {result.recommendedAction}
+                </div>
+                <span className="badge bg-danger-subtle text-danger border border-danger">Retry: No</span>
+              </div>
             ) : (
-              <div className="card shadow-sm border-0 p-4 text-center text-muted h-75 d-flex justify-content-center">
-                <p className="mb-0">
-                  Select or enter transaction failure parameters to see an instant AI root cause analysis.
-                </p>
+              <div className="card border-0 shadow-sm p-4 text-center text-muted h-75 d-flex justify-content-center">
+                Click "Run AI Diagnosis" to analyze failure reasons.
               </div>
             )}
           </div>
         </div>
-
-        <TransactionTable transactions={transactions} />
       </div>
     </div>
   );
