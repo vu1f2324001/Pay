@@ -1,3 +1,4 @@
+cat << 'EOF' > package.json
 {
   "name": "paywise-ai-backend",
   "version": "1.0.0",
@@ -18,4 +19,4 @@
     "nodemon": "^3.1.4"
   }
 }
-
+EOF
